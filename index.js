@@ -1,6 +1,11 @@
+function debug() {
+  console.log(JSON.stringify(history, ' ', 4))
+}
+
 module.exports = function (options) {
-  let ms = options.ms
-  let limit = options.limit
+  const ms = options.ms
+  const limit = options.limit
+  const ignoreIp = !!options.ignoreIp
 
   if (!ms) {
     throw new Error('Missing options: ms')
@@ -11,9 +16,6 @@ module.exports = function (options) {
 
   const history = {}
 
-  function debug() {
-    console.log(JSON.stringify(history, ' ', 4))
-  }
 
   setInterval(function () {
     let now = Date.now()
@@ -25,13 +27,8 @@ module.exports = function (options) {
     // debug()
   }, 1000 * 60 * 15) // clean very 15min
 
-
   return (req, res, next) => {
-    let ip = req.ip.replace(/^.*:/, '')
-    if (!ip) {
-      return next()
-    }
-
+    let ip = ignoreIp ? '*' : req.ip
     let now = Date.now()
     let host = history[ip]
 
