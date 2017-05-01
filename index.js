@@ -1,11 +1,8 @@
-function debug() {
-  console.log(JSON.stringify(history, ' ', 4))
-}
-
 module.exports = function (options) {
   const ms = options.ms
   const limit = options.limit
-  const ignoreIp = !!options.ignoreIp
+  const keyFn = options.keyFn
+  const onReachLimit = options.onReachLimit
 
   if (!ms) {
     throw new Error('Missing options: ms')
@@ -16,26 +13,33 @@ module.exports = function (options) {
 
   const history = {}
 
+  function debug() {
+    console.log(JSON.stringify(history, ' ', 4))
+  }
 
   setInterval(function () {
     let now = Date.now()
-    for (let ip in history) {
-      if (now - history[ip].lastAccess > ms) {
-        delete history[ip]
+    for (let key in history) {
+      if (now - history[key].lastAccess > ms) {
+        delete history[key]
       }
     }
-    // debug()
-  }, 1000 * 60 * 15) // clean very 15min
+  }, 1000 * 60 * 10) // clean very 10min
 
   return (req, res, next) => {
-    let ip = ignoreIp ? '*' : req.ip
+    let key = typeof keyFn === 'function' ? keyFn(req) : '*'
     let now = Date.now()
-    let host = history[ip]
+    let host = history[key]
 
     if (host) {
-      // debug()
+      if(options.debug){
+        debug()
+      }
       let list = host.list
       if (list.length >= limit && now - list[0] < ms) {
+        if(typeof onReachLimit === 'function'){
+          return onReachLimit(req, res)
+        }
         let err = new Error('Too many requests')
         err.status = 429
         return next(err)
@@ -50,7 +54,7 @@ module.exports = function (options) {
       }
     }
     else {
-      history[ip] = {
+      history[key] = {
         lastAccess: now,
         list: [now]
       }
