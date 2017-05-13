@@ -1,3 +1,5 @@
+'use strict'
+
 function limitInRange(val, min, max) {
   if (val > max) {
     return max
@@ -49,9 +51,7 @@ module.exports = function (defaultOptions) {
       setTimeout(cleanHistory, gcInterval)
     }
 
-    setTimeout(function () {
-      cleanHistory()
-    }, gcInterval)
+    setTimeout(() => cleanHistory(), gcInterval)
 
     return (req, res, next) => {
       let key = typeof keyFn === 'function' ? keyFn(req) : '*'

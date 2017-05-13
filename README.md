@@ -69,6 +69,6 @@ const userLoginLimit = loginLimit({
 There may be multiple instances running together, we need to know which one the debug log belongs to. For convenience, we specify its name in options.
 
 ### Specify QPS
-Some APIs may experience a sudden spike. For example, the QPS suddenly rise from 0 to 1000. In this case, auto-tuning timer is too slow to detect the sudden change. So we should specify QPS to a higher value.
+Some APIs may experience a traffic surge. For example, the QPS suddenly rises from 0 to 1000. In this case, auto-tuning timer is too slow to detect the sudden change. So we should specify QPS to a higher value.
 
 NOTE: the cleaner timer has a range from 5 seconds to 5 minutes. If QPS > 1000, timer interval is 5 seconds. If QPS < 17, timer interval is 5 minutes.
